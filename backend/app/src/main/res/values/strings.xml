@@ -1,0 +1,49 @@
+<resources>
+    <string name="app_name">frontend-android</string>
+    <string name="button_click">Click</string>
+    <string name="error_message">Something went wrong</string>
+    <string name="input_placeholder">Enter your %1$s here</string>
+
+    //Login
+    <string name="login_button">Login</string>
+    <string name="login_invalid_credentials">Invalid credentials</string>
+    <string name="login_temp_success">Successful</string>
+
+    //Teams
+    <string name="team_add">Add team</string>
+    <string name="team_no_teams">No teams</string>
+    <string name="team_add_members">Add members</string>
+
+    //Button texts
+    <string name="dashboard_teams_button">"Teams"</string>
+
+    //labels
+    <string name="password_label">Enter your password</string>
+    <string name="confirmPassword_label">Confirm your password</string>
+    <string name="confirm_password_doesnt_match">Password doesn\'t match</string>
+    <string name="email_label">Enter your business email address</string>
+    <string name="first_name_label">Enter your first name</string>
+    <string name="prefixes_label">Enter your prefix</string>
+    <string name="last_name_label">Enter your last name</string>
+
+    //Registration
+    <string name="register_button_text">Register</string>
+    <string name="password_title">Password</string>
+    <string name="next_button_text">Next</string>
+    <string name="email_title">Email Address</string>
+    <string name="registration_title">Registration</string>
+    <string name="full_name_title">Full Name</string>
+    <string name="optional_text">Optional</string>
+    <string name="to_full_name_screen">I don\'t have an account</string>
+
+    //Actionbar
+    <string name="actionbar_team">%1$s team</string>
+
+    //Search
+    <string name="search_placeholder">Search by %1$s</string>
+    <string name="user_search">Search for users</string>
+
+    //C4
+    <string name="c4_model_title">"C4 models"</string>
+    <string name="c4_no_contexts">There are currently no C4 contexts available</string>
+</resources>

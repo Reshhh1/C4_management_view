@@ -1,0 +1,52 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+skinparam MaxMessageSize 100
+participant ":SessionController" as Controller
+participant ":SessionService" as Service
+participant ":UserRepository" as UserRepository
+participant ":SessionRepository" as SessionRepository
+participant ":User" as User
+participant ":Session" as Session
+
+
+group HTTP POST /session
+    ?-> Controller    : HTTP **POST** /sessions
+    activate Controller
+
+
+    Controller -> Service: login(userAuthenticator)
+    deactivate Controller
+    activate Service
+
+    Service -> UserRepository: getUserByEmail(email)
+    activate UserRepository
+    Service <-- UserRepository: Boolean
+    deactivate UserRepository
+    Service -> UserRepository: getPasswordByEmail(email)
+    activate UserRepository
+    Service <-- UserRepository: String?
+    deactivate UserRepository
+    Service -> UserRepository: getEmail(email)
+    activate UserRepository
+    Service <-- UserRepository: Boolean
+    deactivate UserRepository
+    Service -> SessionRepository: createSession(token, userId, expireDate)
+    activate SessionRepository
+    SessionRepository -> Session: **<<creates>>**
+    deactivate SessionRepository
+    activate Session
+    SessionRepository <-- Session: **void**
+    deactivate Session
+    activate SessionRepository
+    Service <-- SessionRepository: InsertStatement<Number>
+    deactivate SessionRepository
+    Controller <-- Service: void
+    deactivate Service
+
+    activate Controller
+    ?<- Controller    : HTTP **200**
+    deactivate
+
+
+@enduml

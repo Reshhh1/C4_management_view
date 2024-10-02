@@ -1,0 +1,143 @@
+@startuml
+
+left to right direction
+
+package presentation <<Folder>> {
+    class View  {
+        + TeamCreateScreen
+        + TeamCreateAddMember
+    }
+    class TeamCreateViewModel {
+      - createTeamUseCase: CreateTeamUseCase
+      - searchUserUseCase: SearchUserUseCase
+      - teamUserListState: TeamUserListState
+      - teamCreateState: TeamCreateState
+      - networkError: String
+      --
+      + onTeamNameChange(teamCreateState: TeamCreateState): void
+      + onUserSearchTermChange(searchTerm: String): void
+      - createTeam(): void
+      + getUsersByName(): void
+      + addSelectedMember(user: UserSummary): void
+      + removeSelectedMember(user: UserSummary): void
+      + removeMember(user: UserSummary): void
+      + cancelSelectedMembers(): void
+      + saveSelectedMembers(): void
+      - handleTeamCreationSuccess(): void
+      - validateAndUpdateTeamNameErrorState(): void
+      - validateAndUpdateTeamMemberErrorState(): void
+      + isSelectedMembersValid(): Boolean
+      - validateAndUpdateSavingSelectedMembers(): void
+      - validateAndUpdateSelectedMembers(): void
+      - containsError(): Boolean
+      + resetState(): void
+      + onSubmit(): void
+    }
+
+    class TeamCreateState {
+      + name: String
+      + nameError: String
+      + members: List<UserSummary>
+      + memberError: String
+      + selectedMembers: List<UserSummary>
+      + selectedMemberError: String
+      + userSearchTerm: String
+      + successfullyCreated: Boolean
+    }
+
+    class TeamUserListState<<SEALED>> {
+        Loading: TeamUserListState()
+        Success(user: List<UserSummary>): TeamUserListState()
+        Error: TeamUserListState(errorMessage: String)
+    }
+}
+
+package Domain <<Folder>> {
+    class CreateTeamUseCase {
+      - teamRepository: TeamRepository
+      --
+      + createTeam(state: TeamCreateState): TeamResource
+      + getTeamNameValidationResult(state: TeamCreateState): ValidationResult
+      + getMemberValidationResult(state: TeamCreateState): ValidationResult
+      + isValidSelectedMember(state: TeamCreateState, userId: String): Boolean
+      + getSavingSelectedMemberValidationResult(state: TeamCreateState): ValidationResult
+      + getSelectedMemberValidationResult(state: TeamCreateState): ValidationResult
+    }
+
+    class SearchUserUseCase {
+      - userRepository: UserRepository
+      --
+      + getSearchTermValidationResults(searchTerm: String): ValidationResult
+      + getUsersBySearchTerm(searchTerm: String): Resource<List<UserSummary>>
+    }
+
+    class ValidationResult {
+      + successful: Boolean
+      + errorMessage: String?
+    }
+}
+
+package Data <<Folder>> {
+    class UserSummary {
+      + id: String
+      + name: String
+    }
+
+    class Resource<T> {
+      + data: T?
+      + message: String?
+    }
+
+    class TeamResource {
+        Success<T>(data: T?) : TeamResource<T>(data)
+        NameAlreadyExists<T>(message: String, data: T?) : TeamResource<T>(data, message)
+        NetworkError<T>(message: String, data: T?) : TeamResource<T>(data, message)
+    }
+
+    interface TeamRepository {
+        getTeamSummaries(): Resource<List<TeamSummary>>
+        saveTeam(requestBody: TeamModel): TeamResource<ResponseId>
+    }
+
+    interface UserRepository {
+        getUsersBySearchTerm(searchName: String): Resource<List<UserSummary>>
+        createUser(newUser: RegistrationRequest): RegistrationResult<String>
+    }
+
+    class TeamImplementation {
+        +getTeamSummaries(): Resource<List<TeamSummary>>
+        +saveTeam(requestBody: TeamModel): TeamResource<ResponseId>
+    }
+
+    class UserImplementation {
+        +getUsersBySearchTerm(searchName: String): Resource<List<UserSummary>>
+        +createUser(newUser: RegistrationRequest): RegistrationResult<String>
+    }
+
+    interface UserApi {
+        + @GET getUserByName(@Query("name") nameValue: String): Response<List<UserSummary>>
+    }
+
+    interface TeamApi {
+        @POST createTeam(@Body requestBody: TeamModel): Response<ResponseId>
+    }
+}
+
+View --> TeamCreateViewModel
+TeamCreateViewModel --* CreateTeamUseCase
+TeamCreateViewModel --* SearchUserUseCase
+TeamCreateViewModel --* TeamCreateState
+TeamCreateViewModel --* TeamUserListState
+
+CreateTeamUseCase --* TeamRepository
+SearchUserUseCase --* UserRepository
+
+TeamRepository --|> TeamImplementation
+UserRepository --|> UserImplementation
+
+TeamImplementation --* TeamApi
+TeamImplementation --* TeamResource
+UserImplementation --* UserApi
+UserImplementation --* Resource
+UserImplementation --* UserSummary
+@enduml

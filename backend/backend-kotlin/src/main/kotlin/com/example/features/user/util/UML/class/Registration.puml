@@ -1,0 +1,138 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+package Data <<Folder>> {
+Entity User {
++ firstName: String
++ lastName: String
++ prefixes: String?
++ role: Roles
++ email: String
++ password: String
+}
+
+
+class UserRepository {
++ createUser(user: UserModel): Unit
+}
+class UserFactory {
++ convertToUserModel(createUserDTO: CreateUserDTO): UserModel
+}
+package MySQL <<Database>> {
+}
+package H2 <<Database>> {
+}
+UserRepository --> MySQL
+UserRepository --> H2
+UserRepository --> User
+}
+class CreateUserDTO {
++ firstName: String
++ lastName: String
++ prefixes: String?
++ email: String
++ password: String
+}
+
+package Controller <<Folder>> {
+class UserController {
++ constructor(userService: UserService,exceptionHandler: ExceptionHandler)
+--
++ createUser(call: ApplicationCall, createUserDTO: CreateUserDTO)
+}
+class ExceptionHandler {
++ handleExceptionResponse(exception: Exception, call: ApplicationCall)
+}
+UserController ..> ExceptionHandler : uses
+}
+class ResponseMessage {
+constructor(errorCode: String)
+}
+UserFactory --> CreateUserDTO
+ExceptionHandler ..> ResponseMessage : uses
+
+package Business <<Folder>> {
+class UserService {
++ constructor(userRepository: UserRepository,userFactory: UserFactory)
+--
++ registerUser(createUserDTO: CreateUserDTO): Unit
++ doesEmailExists(email: String): Unit
+}
+
+class UserModel {
+- id: Int?
+- firstName: String
+- prefixes: String?
+- lastName: String
+- role: Roles
+- email: String
+- password: String
+- config: Config
++ emailConfig: String
+- passwordConfig: String
+--
++ hashPassword(): String
+- isFirstNameValid(firstName: String): Unit
+- isLastNameValid(lastName: String): Unit
+- isPrefixesValid(prefixes: String?): Unit
+- isEmailValid(email: String): Unit
+- isPasswordValid(password: String): Unit
++ validateUserInputs(): Unit
+}
+UserService ..> UserModel : uses
+UserService ..> CreateUserDTO : uses
+}
+class StringValidator {
++ isLengthValid(minimumLength: Int, maximumLength: Int, input: String): Boolean
+}
+
+enum ErrorCode {
++ constructor(code: String)
+--
++ NUMERIC_ID_REQUIRED
++ UNAUTHORIZED
++ SESSION_EXPIRED
++ INVALID_REQUEST_BODY
++ INVALID_QUERY_CHARACTER
++ USER_NOT_FOUND
++ INVALID_CREDENTIALS
++ CREATOR_NOT_FOUND
++ INVALID_LENGTH_FIRST_NAME
++ INVALID_LENGTH_LAST_NAME
++ INVALID_LENGTH_PREFIXES
++ INVALID_EMAIL
++ EMAIL_IS_EMPTY
++ INVALID_PASSWORD
++ INCORRECT_PASSWORD
++ NEW_PASSWORD_EQUAL_TO_OLD
++ EMAIL_ALREADY_EXISTS
++ INVALID_ROLE
++ TEAM_NOT_FOUND
++ NAME_ALREADY_EXISTS
++ INVALID_NAME_LENGTH
++ INVALID_NAME_CHARACTER
++ INVALID_STARTING_CHARACTER
++ NAME_IS_EMPTY
++ MEMBER_NOT_FOUND
++ TOO_MANY_MEMBERS
++ NOT_ENOUGH_MEMBERS
++ INVALID_MEMBER_IDS
++ MEMBER_IS_EMPTY
++ AVATAR_NOT_FOUND
++ INVALID_MIME_TYPE
++ INVALID_SIZE
++ INVALID_EXTENSION
++ INVALID_DIMENSIONS
++ INVALID_MEMBER_AMOUNT
++ CREATOR_IS_EMPTY
++ CONTEXT_NOT_FOUND
++ CONTAINER_NOT_FOUND
++ COMPONENT_NOT_FOUND
+}
+
+UserController ..> UserService : uses
+UserModel ..> StringValidator : uses
+UserService ..> UserRepository : uses
+UserService ..> UserFactory : uses
+
+@enduml

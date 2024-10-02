@@ -1,0 +1,52 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+skinparam MaxMessageSize 350
+participant "CLIENT" as Client
+participant ":UserRoutes" as Routing
+participant ":UserController" as Controller
+participant ":UserService" as Service
+participant ":SearchTermParser" as SearchTermParser
+participant ":UserRepository" as Repository
+participant ":UserFactory" as Factory
+
+group HTTP GET /users?name="henk"
+    Client-> Routing    : HTTP **GET** /users?name="henk"
+    activate Client
+    activate Routing
+
+
+    Routing-> Controller    : getUsersBySearchOptions(searchOptions, call)
+    deactivate
+    activate Controller
+
+   Controller -> Service: getUsersBySearchOptions(searchOptions)
+   deactivate Controller
+   activate Service
+
+   Service -> Service: validateSearchTerm()
+   Service -> SearchTermParser: parseUserSearchTerm(searchTerm)
+   activate SearchTermParser
+
+   SearchTermParser -> Service: **Return** <UserSearchOptions>
+   deactivate SearchTermParser
+
+   Service -> Repository: getUsersBySearchOptions(userSearchOptions)
+   activate Repository
+
+   Repository -> Factory: convertToUserSummary(resultRow)
+   activate Factory
+
+   Factory -> Repository: **Return** <UserSummary>
+   deactivate Factory
+
+   Repository -> Service: List<UserSummary>
+   deactivate Repository
+
+   Service -> Controller: **Return** List<UserSummary>
+   deactivate Service
+   activate Controller
+
+   Controller -> Client    : HTTP **200** **Return** List<UserSummary>
+   deactivate Client
+@enduml

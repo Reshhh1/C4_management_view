@@ -1,0 +1,25 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+
+title Team Overview
+Screen -> ViewModel: on initialization
+activate Screen
+activate ViewModel
+ViewModel -> Repository: fetch team summaries
+deactivate ViewModel
+activate Repository
+Repository -> API: GET /teams
+deactivate Repository
+activate API
+API -> Repository: List<TeamSummary>
+deactivate API
+activate Repository
+Repository -> ViewModel: Updates data
+deactivate Repository
+activate ViewModel
+ViewModel -> Screen: Receives updates
+deactivate ViewModel
+deactivate Screen
+
+@enduml

@@ -1,0 +1,28 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+
+title C4 Model | Contexts
+Screen -> ViewModel: on initialization
+activate Screen
+activate ViewModel
+ViewModel -> UseCase: fetch contexts
+deactivate ViewModel
+activate UseCase
+UseCase -> Repository: getContextLayer()
+deactivate UseCase
+activate Repository
+Repository -> "c4enhanced API": GET /contexts
+deactivate Repository
+activate "c4enhanced API"
+"c4enhanced API" -> Repository: List<ElementDTO>
+deactivate "c4enhanced API"
+activate Repository
+Repository -> ViewModel: Updates state data
+deactivate Repository
+activate ViewModel
+ViewModel -> Screen: Receives updates
+deactivate ViewModel
+deactivate Screen
+
+@enduml

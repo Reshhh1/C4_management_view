@@ -1,0 +1,32 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+skinparam MaxMessageSize 100
+participant ":UserController" as Controller
+participant ":UserService" as Service
+participant ":UserRepository" as Repository
+participant ":User" as User
+
+group HTTP POST /users
+      ?-> Controller    : HTTP **POST** /users
+      activate Controller
+
+      Controller -> Service: createUser(createUserDTO)
+      deactivate
+      activate Service
+
+      deactivate Repository
+      Service -> Repository: createUser(createUserDTO)
+
+      Repository -> User: <<create>>
+      activate User
+      Repository <-- User: void
+      deactivate
+      Service <-- Repository: void
+      Controller <-- Service: void
+
+      activate Controller
+      ?<- Controller    :HTTP **201**
+      deactivate
+
+@enduml

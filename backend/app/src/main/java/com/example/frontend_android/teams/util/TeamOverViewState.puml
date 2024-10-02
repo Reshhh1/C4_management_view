@@ -1,0 +1,16 @@
+@startuml
+'https://plantuml.com/state-diagram
+
+scale 800 width
+
+state TeamOverViewState {
+Loading: Waiting for data
+Success: Received data
+Error: Received error message
+    [*] --> Loading
+    Loading --> Success
+    Loading --> Error
+
+}
+
+@enduml

@@ -1,0 +1,81 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+package Data-layer <<Folder>> {
+class UserRepository {
+- userFactory: UserFactory
++ getUserById(id: Int)
+}
+package MySQL <<Database>> {
+}
+package H2 <<Database>> {
+}
+class UserFactory {
++ convertResultRowToBusinessModel(row: ResultRow): UserModel
+}
+interface Converter<Business> {
++ convertResultRowToBusinessModel(): Business
+}
+entity User {
+firstName: String
++ prefixes: String?
++ lastName: String
++ email: String
++ role: Roles
+- password: String
+}
+}
+
+
+package Application-layer <<Folder>> {
+object UserDetailsDTO {
++ firstName: String
++ prefixes: String?
++ lastName: String
++ email: String
+}
+object UserModel {
++ firstName: String
++ prefixes: String?
++ lastName: String
++ email: String
++ role: Roles
+- password: String
+- config: Config
++ emailConfig: String
+- passwordConfig: String
+}
+class UserService {
+- userRepository: UserRepository
++ getUserDetailsById(id: Int): UserDetailsDTO
+}
+enum Roles {
+MANAGER
+MEMBER
+}
+class UserController {
+- userService: UserService
+- exceptionHandler: ExceptionHandler
++ getUserDetailsById(id: Int, call: ApplicationCall)
+}
+class ExceptionHandler {
++ handleExceptionResponse(exception: Exception, call: ApplicationCall)
+}
+}
+
+
+User --> UserRepository
+UserRepository --> MySQL
+UserRepository --> H2
+
+ExceptionHandler --* UserController
+UserService --* UserController
+UserRepository --* UserService
+UserFactory --* UserRepository
+Converter --|> UserFactory
+UserFactory <-- UserModel
+UserService <-- UserDetailsDTO
+UserModel <-- Roles
+
+
+@enduml

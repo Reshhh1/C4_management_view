@@ -1,0 +1,28 @@
+image: jangrewe/gitlab-ci-android
+
+before_script:
+  - export GRADLE_USER_HOME=$(pwd)/.gradle
+  - chmod +x ./gradlew
+  - export ANDROID_HOME=/path/to/android/sdk
+  - export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    # Install OpenJDK 17
+    - apt-get update -qy
+    - apt-get install -y openjdk-17-jdk
+    - apt-get install -y android-sdk
+
+    # Run other Gradle tasks
+    - ./gradlew test
+
+  tags:
+    - hva
+
+
+
+

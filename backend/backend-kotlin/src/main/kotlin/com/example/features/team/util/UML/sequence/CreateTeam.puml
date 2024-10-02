@@ -1,0 +1,57 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+skinparam MaxMessageSize 350
+participant "CLIENT" as Client
+participant ":TeamRoutes" as Routing
+participant ":TeamController" as Controller
+participant ":TeamService" as Service
+participant ":TeamModel" as Model
+participant ":TeamRepository" as Repository
+participant ":TeamFactory" as Factory
+
+group HTTP GET /users/:id
+    Client-> Routing    : HTTP **POST** /teams
+    activate Client
+    activate Routing
+
+
+    Routing-> Controller    : createTeam(createTeamDTO)
+    deactivate
+    activate Controller
+
+   Controller -> Service: createTeam(createTeamDTO, createdBy)
+   deactivate Controller
+   activate Service
+
+   Service -> Factory: convertCreateDtoToTeamModel(createTeamDTO))
+   activate Factory
+   Factory -> Service: **Return** <TeamModel>
+   deactivate Factory
+
+   Service -> Model: validateModel()
+   Service -> Service: validateTeamNameUniqueness(name)
+
+   Service -> Service: getMemberEntities(members)
+
+   Service -> Repository: createTeam(teamModel, members)
+   deactivate Service
+   activate Repository
+
+   Repository --> Service: Int
+   deactivate Repository
+
+   activate Service
+   Service --> Controller: Int
+   deactivate Service
+
+   activate Controller
+   Controller -> Routing    : HTTP **200** JSON body: {id: 1}
+   deactivate Controller
+
+   activate Routing
+   Routing -> Client
+   deactivate Routing
+
+   deactivate Client
+@enduml

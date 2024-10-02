@@ -1,0 +1,19 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+left to right direction
+
+class View {
+}
+
+class ViewModel {
+
+}
+
+class Model {
+}
+View --> ViewModel: "Observes for any data changes"
+ViewModel --> View: Updates View's data
+ViewModel --> Model: Sends data
+Model --> ViewModel: Receives data
+@enduml

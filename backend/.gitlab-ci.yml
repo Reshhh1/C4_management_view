@@ -1,0 +1,21 @@
+image: gradle:alpine
+
+before_script:
+  - GRADLE_USER_HOME="$(pwd)/.gradle"
+  - export GRADLE_USER_HOME
+  - cd backend-kotlin
+  - chmod +x ./gradlew
+
+test:
+  stage: test
+  script:
+    - ./gradlew test
+  variables:
+    environment: testing
+  artifacts:
+    reports:
+      junit: backend-kotlin/build/test-results/test/**/TEST-*.xml
+    paths:
+      - backend-kotlin/build/reports/tests/
+  tags:
+    - hva

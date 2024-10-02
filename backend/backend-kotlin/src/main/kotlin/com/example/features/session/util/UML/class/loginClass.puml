@@ -1,0 +1,199 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+package Data-Layer <<Folder>> {
+class SessionRepository {
++ createSession(token: String, userId: Int, createdBy: LocalDateTime,expireDate: LocalDateTime)
+}
+class UserRepository {
+- userFactory: UserFactory
+--
++ getUserDetailsById(id: Int): UserDetailsDTO?
++ getEmail(email: String?): Boolean
++ getPasswordByEmail(email: String): String?
++ getUserByEmail(email: String): UserModel?
+}
+
+class UserFactory {
++ convertResultRowToBusinessModel(row: ResultRow): UserModel
++ convertResultRowToUserDetails(row: ResultRow): UserDetailsDTO
+}
+interface Converter<Business> {
++ convertResultRowToBusinessModel(): Business
+}
+
+Entity User {
++ id: Int
++ firstName: String
++ lastName: String
++ role: Role
++ email: String
++ password: String
+}
+Entity Session {
++ userId: Int
++ token: String
++ createdBy: DateTime
++ expireDate: DateTime
+}
+
+package MySQL <<Database>> {
+}
+package H2 <<Database>> {
+}
+SessionRepository --> MySQL
+SessionRepository --> H2
+UserRepository --> MySQL
+UserRepository --> H2
+Session ..> User : uses
+UserRepository ..> UserFactory : uses
+Converter --|> UserFactory
+SessionRepository ..> Session : uses
+}
+User ..> Roles : uses
+enum Roles {
+MANAGER
+MEMBER
+}
+
+package Service <<Folder>> {
+class SessionService {
++ constructor(sessionRepository: SessionRepository,userRepository: UserRepository)
++ login(userAuthenticator: UserAuthenticator): String
++ getUserByEmail(email: String): UserModel
++ createToken(userAuthenticator: UserAuthenticator): String
+- isLoginSuccessful(userAuthenticator: UserAuthenticator): Boolean
++ passwordIsIdentical(userAuthenticator: UserAuthenticator): Unit
+- validateUserCredentials(userAuthenticator: UserAuthenticator): Boolean
+}
+
+class UserAuthenticator {
+- credentialsValidator: CredentialsValidator
+--
++ constructor(email: String, password: String)
++ doesPasswordMatch(hashedPassword: String): Boolean
++ validatePasswordForAuthentication(password: String)
+}
+
+class CredentialsValidator {
+- emailRegex: Regex
+--
++ constructor(email: String, password: String)
++ validateEmail(): Boolean
++ doesPasswordMatch(hashedPassword: String): Boolean
+}
+
+class JWTAuthentication {
+- config: Config
+- audience: String
+- issuer: String
+- secret: String
+--
++ generateToken(email: String): String
+}
+
+class UserModel {
+- id: Int
+- firstName: String
+- prefixes: String?
+- lastName: String
+- role: Roles
+- email: String
+- password: String
+--
++ getHashedPassword(): String
++ getUserId(): Int
+}
+}
+class UnauthorizedError {
++ constructor(error: String)
+}
+class InvalidCredentialsError {
++ constructor(error: String)
+}
+SessionService ..> UserAuthenticator : uses
+SessionService ..> JWTAuthentication : uses
+SessionService ..> UserModel : uses
+UserAuthenticator ..> CredentialsValidator : uses
+UnauthorizedError ..> SessionService
+InvalidCredentialsError ..> SessionService
+
+package Controller <<Folder>> {
+
+class ExceptionHandler {
++ handleExceptionResponse(exception: Exception, call: ApplicationCall)
+}
+class SessionController {
+- exceptionHandler: ExceptionHandler
+--
++ constructor(sessionService: SessionService)
++ login(call: ApplicationCall, userAuthenticator: UserAuthenticator)
+}
+}
+class ResponseMessage {
+constructor(errorCode: String)
+}
+class UserDetailsDTO {
++ firstName: String
++ prefixes: String?
++ lastName: String
++ email: String
+}
+SessionController ..> ExceptionHandler : uses
+SessionController ..> SessionService : uses
+SessionController ..> UserAuthenticator : uses
+UserModel ..> Roles : uses
+ExceptionHandler ..> ResponseMessage : uses
+SessionService ..> UserRepository : uses
+SessionService ..> SessionRepository : uses
+UserRepository ..> UserDetailsDTO : uses
+
+enum ErrorCode {
++ constructor(code: String)
+--
++ NUMERIC_ID_REQUIRED
++ UNAUTHORIZED
++ SESSION_EXPIRED
++ INVALID_REQUEST_BODY
++ INVALID_QUERY_CHARACTER
++ USER_NOT_FOUND
++ INVALID_CREDENTIALS
++ CREATOR_NOT_FOUND
++ INVALID_LENGTH_FIRST_NAME
++ INVALID_LENGTH_LAST_NAME
++ INVALID_LENGTH_PREFIXES
++ INVALID_EMAIL
++ EMAIL_IS_EMPTY
++ INVALID_PASSWORD
++ INCORRECT_PASSWORD
++ NEW_PASSWORD_EQUAL_TO_OLD
++ EMAIL_ALREADY_EXISTS
++ INVALID_ROLE
++ TEAM_NOT_FOUND
++ NAME_ALREADY_EXISTS
++ INVALID_NAME_LENGTH
++ INVALID_NAME_CHARACTER
++ INVALID_STARTING_CHARACTER
++ NAME_IS_EMPTY
++ MEMBER_NOT_FOUND
++ TOO_MANY_MEMBERS
++ NOT_ENOUGH_MEMBERS
++ INVALID_MEMBER_IDS
++ MEMBER_IS_EMPTY
++ AVATAR_NOT_FOUND
++ INVALID_MIME_TYPE
++ INVALID_SIZE
++ INVALID_EXTENSION
++ INVALID_DIMENSIONS
++ INVALID_MEMBER_AMOUNT
++ CREATOR_IS_EMPTY
++ CONTEXT_NOT_FOUND
++ CONTAINER_NOT_FOUND
++ COMPONENT_NOT_FOUND
+}
+
+UserModel ..> ErrorCode : uses
+SessionService ..> ErrorCode : uses
+UserAuthenticator ..> ErrorCode : uses
+
+@enduml

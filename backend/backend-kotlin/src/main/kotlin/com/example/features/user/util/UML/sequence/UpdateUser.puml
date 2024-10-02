@@ -1,0 +1,32 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+skinparam MaxMessageSize 100
+participant ":UserController" as Controller
+participant ":UserService" as Service
+participant ":UserRepository" as UserRepository
+participant ":User" as User
+
+group HTTP PUT /users
+    ?-> Controller    : HTTP **PUT** /users
+    activate Controller
+
+    Controller -> Service: updateUserDetails(email: String, updateUserDTO: UpdateUserDTO)
+    deactivate Controller
+    activate Service
+
+    Service -> UserRepository: updateUser(userId: Int, user: UserModel): Int
+    deactivate Service
+    activate UserRepository
+    UserRepository -> User:**<<updates>>**
+    activate User
+    UserRepository <-- User: **void**
+    deactivate User
+    Service <-- UserRepository: **Int**
+    deactivate UserRepository
+    Controller <-- Service: **void**
+
+     activate Controller
+        ?<- Controller    : HTTP **200**
+        deactivate
+@enduml

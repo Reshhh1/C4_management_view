@@ -1,0 +1,115 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+package Controller <<Folder>> {
+class TeamController {
+- teamService: TeamService
+- exceptionHandler: ExceptionHandler
++ getTeamDetailsById(id: Int, call: ApplicationCall)
+}
+class ExceptionHandler {
++ handleExceptionResponse(exception: Exception, call: ApplicationCall)
+}
+}
+
+package Business <<Folder>> {
+    class TeamService {
+        -userRepository: UserRepository
+        -teamRepository: TeamRepository
+        -teamFactory: TeamFactory
+        + createTeamAndReturnId(createTeamDTO: CreateTeamDTO, createdBy: Int): Int
+        + getTeamSummaries(): List<TeamSummary>
+        + getMemberEntities(userIds: List<Int>): List<UserEntity>
+        + validateTeamNameUniqueness(teamName: String)
+        + getTeamDetailsById(id: Int): TeamDetails
+    }
+
+    class TeamModel {
+            name: String,
+            members: List<Int>,
+            createdBy: Int,
+            createdAt: Date?
+    }
+}
+
+package Data <<Folder>> {
+    class TeamRepository {
+        +getTeamDetailsById(id: Int): TeamDetails?
+        + createTeamAndReturnId(teamModel: TeamModel, members: List<UserEntity>): Int
+        + doesTeamExists(teamName: String): Boolean
+        + getTeamsList(): List<TeamSummary>
+        -getBasicTeamDataById(id)
+        -getTeamMemberSummariesById(id)
+    }
+    class UserRepository {
+        +getUserEntityById(id: Int): TeamDetails?
+    }
+
+    entity User {
+        id auto int
+        firstName varchar(255)
+        prefixes varchar(255)
+        lastName: varchar(255)
+        role: Role
+        email varchar(255)
+        password varchar(255)
+    }
+    entity Team {
+       PK id auto int
+       name varchar(255)
+       created_by: Date
+       created_at: Date (now)
+    }
+
+    entity TeamUser {
+        FK team_id
+        FK user_id
+    }
+    package MySQL <<Database>> {
+    }
+    package H2 <<Database>> {
+    }
+}
+
+package Util <<Folder>> {
+    class TeamFactory {
+    + convertResultRowToBusinessModel(row: ResultRow): TeamModel
+    + convertToTeamDetails(teamData: TeamData, members: List<UserSummary>): TeamDetails
+    }
+
+    class UserFactory {
+    + convertResultRowToBusinessModel(row: ResultRow): UserModel
+    + convertToUserSummary(userEntity: UserEntity): TeamDetails
+    }
+
+    interface Converter<Business> {
+    + convertResultRowToBusinessModel(): Business
+    }
+}
+
+UserRepository --> MySQL
+UserRepository --> H2
+TeamRepository --> MySQL
+TeamRepository --> H2
+
+ExceptionHandler --* TeamController
+TeamService --* TeamModel
+TeamService -* TeamController
+TeamService --* TeamRepository
+TeamService --* UserRepository
+TeamService --* UserFactory
+TeamService -* TeamFactory
+
+Converter --|> TeamFactory
+Converter --|> UserFactory
+
+UserRepository --> User
+TeamRepository --> Team
+User --> TeamUser
+Team --> TeamUser
+
+
+
+TeamService ..> ErrorCode : uses
+
+@enduml

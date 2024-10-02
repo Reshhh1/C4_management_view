@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="elevation_card">10dp</dimen>
+    <dimen name="medium_dimen">15dp</dimen>
+    <dimen name="width_120">120dp</dimen>
+    <dimen name="small_dimen">10dp</dimen>
+    <dimen name="content_width">40dp</dimen>
+    <dimen name="content_height">80dp</dimen>
+    <dimen name="text_field_width">310dp</dimen>
+
+    <dimen name="default_overview_text_padding">265dp</dimen>
+    <dimen name="default_overview_icon_size">35dp</dimen>
+    <dimen name="default_overview_padding">15dp</dimen>
+    <dimen name="default_overview_icon_padding">20dp</dimen>
+
+    //C4 model
+    <dimen name="c1_overview_padding">260dp</dimen>
+    <dimen name="c2_overview_padding">225dp</dimen>
+</resources>

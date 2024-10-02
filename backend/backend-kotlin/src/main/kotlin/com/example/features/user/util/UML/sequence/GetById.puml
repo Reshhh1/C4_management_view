@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+skinparam MaxMessageSize 100
+participant ":UserController" as Controller
+participant ":UserService" as Service
+participant ":UserRepository" as Repository
+participant ":UserFactory" as Factory
+
+group HTTP GET /users/:id
+    ?-> Controller    : HTTP **GET** /users/:id
+    activate Controller
+
+   Controller -> Service: getUserDetailsById(id)
+   deactivate Controller
+   activate Service
+
+   Service -> Repository: getUserById(id)
+   deactivate Service
+   activate Repository
+
+   Repository -> Factory: convertToUserDetails(row)
+   activate Factory
+
+   Factory --> Repository: **Return** <UserDetailsDTO>
+   deactivate Factory
+
+   Repository --> Service: **Return** <UserDetailsDTO>
+   deactivate Repository
+
+   activate Service
+   Service --> Controller: **Return** <UserDetailsDTO>
+   deactivate Service
+
+   activate Controller
+   ?<- Controller    : HTTP **200** json: <UserDetailsDTO>
+   deactivate
+@enduml
